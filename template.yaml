@@ -1,0 +1,40 @@
+AWSTemplateFormatVersion: "2010-09-09"
+Transform: AWS::Serverless-2016-10-31
+Description: CloufFormation Template for project_name
+#
+# グローバル設定
+#
+Globals:
+  Function:
+    Runtime: python3.7
+    Timeout: 30  # API Gateway が 30 秒でタイムアウトのため、デフォルト値はそこにしておく
+    Tracing: "Active"
+
+Parameters:
+  StageTag: {Type: "String", Description: "Lambda のエイリアス, API のステージに使用", Default: "Prod"}
+
+Resources:
+  EndPointFunction:
+    Type: AWS::Serverless::Function
+    Properties:
+      CodeUri: src/lambda1
+      Handler: project_name.lambda_handler
+      AutoPublishAlias: !Ref StageTag
+      ReservedConcurrentExecutions: 1
+#      Environment: {Variables: {}}
+      Events:
+        API:
+          Type: Api
+          Properties:
+            Path: /api_endpoint
+            Method: post
+            RestApiId: !Ref EndpointAPI
+
+  EndpointAPI:
+    Type: AWS::Serverless::Api
+    Properties: {StageName: !Ref StageTag}
+
+Outputs:
+  ApiEndpointURL:
+    Description: API Endpoint URL
+    Value: !Sub "https://${EndpointAPI}.execute-api.${AWS::Region}.amazonaws.com/${EndpointAPI.Stage}/api_endpoint"
