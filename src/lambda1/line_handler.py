@@ -8,7 +8,7 @@ from linebot import (
     LineBotApi, WebhookHandler
 )
 from linebot.models import (
-    MessageEvent, TextMessage, TextSendMessage,
+    MessageEvent, TextMessage, ImageMessage, LocationMessage, TextSendMessage,
 )
 
 line_bot_api = LineBotApi(os.getenv('LINE_CHANNEL_ACCESS_TOKEN', 'YOUR_CHANNEL_ACCESS_TOKEN'))
@@ -32,6 +32,23 @@ def callback(headers, body):
 
 @handler.add(MessageEvent, message=TextMessage)
 def handle_message(event):
+    """ TextMessage handler """
     line_bot_api.reply_message(
         event.reply_token,
         TextSendMessage(text=event.message.text))
+
+
+@handler.add(MessageEvent, message=ImageMessage)
+def handle_message(event):
+    """ ImageMessage handler """
+    line_bot_api.reply_message(
+        event.reply_token,
+        TextSendMessage(text=event.message.id))
+
+
+@handler.add(MessageEvent, message=LocationMessage)
+def handle_message(event):
+    """ LocationMessage handler """
+    line_bot_api.reply_message(
+        event.reply_token,
+        TextSendMessage(text=event.message.address))
