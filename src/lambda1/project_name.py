@@ -12,6 +12,7 @@ import os
 
 def lambda_handler(event, context):
     _lambda_logging_init()
+    # headers = event["headers"]  # or event["multiValueHeaders"]
     # prm1 = event["pathParameters"]["prm1"]
     # prm2 = event["queryStringParameters"]["prm2"]
     # body = event["body"]
