@@ -17,4 +17,4 @@ make-venv:
 	python3 -m venv venv
 	source venv/bin/activate; \
 	pip install -r requirements.txt; \
-	for i in src/*/requirements.txt; do pip install -r ${i}; done
+	for i in src/*/requirements.txt; do pip install -r $${i}; done
