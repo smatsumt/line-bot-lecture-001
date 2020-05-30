@@ -25,8 +25,12 @@ Resources:
       ReservedConcurrentExecutions: 1
       Environment: {Variables: {
         LINE_CHANNEL_ACCESS_TOKEN: !Ref LineChannelAccessToken,
-        LINE_CHANNEL_SECRET: !Ref LineChannelSecret
+        LINE_CHANNEL_SECRET: !Ref LineChannelSecret,
+        IMAGE_S3_BUCKET: !Ref ImageBucket,
       }}
+      Policies:
+        - S3CrudPolicy:
+            BucketName: !Ref ImageBucket
       Events:
         API:
           Type: Api
@@ -38,6 +42,9 @@ Resources:
   EndpointAPI:
     Type: AWS::Serverless::Api
     Properties: {StageName: !Ref StageTag}
+
+  ImageBucket:
+    Type: AWS::S3::Bucket
 
 Outputs:
   ApiEndpointURL:
