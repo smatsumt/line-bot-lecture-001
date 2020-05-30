@@ -12,16 +12,21 @@ Globals:
 
 Parameters:
   StageTag: {Type: "String", Description: "Lambda のエイリアス, API のステージに使用", Default: "Prod"}
+  LineChannelAccessToken: {Type: "String", Description: "LINE のアクセストークン"}
+  LineChannelSecret: {Type: "String", Description: "LINE のチャンネルシークレット"}
 
 Resources:
   EndPointFunction:
     Type: AWS::Serverless::Function
     Properties:
       CodeUri: src/lambda1
-      Handler: project_name.lambda_handler
+      Handler: lambda_handler.lambda_handler
       AutoPublishAlias: !Ref StageTag
       ReservedConcurrentExecutions: 1
-#      Environment: {Variables: {}}
+      Environment: {Variables: {
+        LINE_CHANNEL_ACCESS_TOKEN: !Ref LineChannelAccessToken,
+        LINE_CHANNEL_SECRET: !Ref LineChannelSecret
+      }}
       Events:
         API:
           Type: Api

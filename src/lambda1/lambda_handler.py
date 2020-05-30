@@ -8,16 +8,28 @@
 import json
 import logging
 import os
+import traceback
+
+import line_handler
+
+logger = logging.getLogger(__name__)
 
 
 def lambda_handler(event, context):
     _lambda_logging_init()
-    # headers = event["headers"]  # or event["multiValueHeaders"]
+    headers = event["headers"]  # or event["multiValueHeaders"]
     # prm1 = event["pathParameters"]["prm1"]
     # prm2 = event["queryStringParameters"]["prm2"]
-    # body = event["body"]
+    body = event["body"]
 
-    return {"statusCode": 200, "body": json.dumps(event)}
+    logger.info(headers)
+    try:
+        result = line_handler.callback(headers, body)
+        return {"statusCode": 200, "body": json.dumps(result)}
+    except Exception as e:
+        result = {"result": "failed", "message": traceback.format_exc()}
+        logger.info(json.dumps(result), exc_info=e)
+        return {"statusCode": 500, "body": json.dumps(result)}
 
 
 def _lambda_logging_init():
