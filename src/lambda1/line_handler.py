@@ -9,7 +9,8 @@ from linebot import (
     LineBotApi, WebhookHandler
 )
 from linebot.models import (
-    MessageEvent, TextMessage, ImageMessage, LocationMessage, TextSendMessage,
+    MessageEvent, TextMessage, ImageMessage, LocationMessage, StickerMessage,
+    TextSendMessage, StickerSendMessage,
 )
 
 import backend_aws
@@ -37,7 +38,7 @@ def callback(headers, body):
 
 
 @handler.add(MessageEvent, message=TextMessage)
-def handle_message(event):
+def handle_text_message(event):
     """ TextMessage handler """
     line_bot_api.reply_message(
         event.reply_token,
@@ -45,7 +46,7 @@ def handle_message(event):
 
 
 @handler.add(MessageEvent, message=ImageMessage)
-def handle_message(event):
+def handle_image_message(event):
     """ ImageMessage handler """
     # 画像を保存
     message_content = line_bot_api.get_message_content(event.message.id)
@@ -64,8 +65,16 @@ def handle_message(event):
 
 
 @handler.add(MessageEvent, message=LocationMessage)
-def handle_message(event):
+def handle_location_message(event):
     """ LocationMessage handler """
     line_bot_api.reply_message(
         event.reply_token,
         TextSendMessage(text=event.message.address))
+
+
+@handler.add(MessageEvent, message=StickerMessage)
+def handle_sticker_message(event):
+    """ StickerMessage handler - スタンプのハンドラ"""
+    line_bot_api.reply_message(
+        event.reply_token,
+        StickerSendMessage(package_id=event.message.package_id, sticker_id=event.message.sticker_id))
