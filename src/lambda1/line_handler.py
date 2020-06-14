@@ -11,6 +11,7 @@ from linebot import (
 from linebot.models import (
     MessageEvent, TextMessage, ImageMessage, LocationMessage, StickerMessage,
     TextSendMessage, StickerSendMessage,
+    QuickReply, QuickReplyButton, CameraAction, CameraRollAction, LocationAction,
 )
 
 import backend_aws
@@ -22,6 +23,14 @@ handler = WebhookHandler(os.getenv('LINE_CHANNEL_SECRET', 'YOUR_CHANNEL_SECRET')
 tmp_dir = Path(os.getenv("TMPDIR", "/tmp"))
 
 logger = logging.getLogger(__name__)
+
+
+# *SendMessage 利用時に共通して使うクリックリプライボタン (カメラで更新等のクイックボタンを毎度、つける)
+quick_reply = QuickReply(items=[
+    QuickReplyButton(action=CameraAction(label="カメラで更新")),
+    QuickReplyButton(action=CameraRollAction(label="写真で更新")),
+    QuickReplyButton(action=LocationAction(label="場所を設定")),
+])
 
 
 def callback(headers, body):
@@ -42,7 +51,7 @@ def handle_text_message(event):
     """ TextMessage handler """
     line_bot_api.reply_message(
         event.reply_token,
-        TextSendMessage(text=event.message.text))
+        TextSendMessage(text=event.message.text, quick_reply=quick_reply))
 
 
 @handler.add(MessageEvent, message=ImageMessage)
@@ -61,7 +70,7 @@ def handle_image_message(event):
     # メッセージ送信
     line_bot_api.reply_message(
         event.reply_token,
-        TextSendMessage(text=event.message.id))
+        TextSendMessage(text=event.message.id, quick_reply=quick_reply))
 
 
 @handler.add(MessageEvent, message=LocationMessage)
@@ -69,7 +78,7 @@ def handle_location_message(event):
     """ LocationMessage handler """
     line_bot_api.reply_message(
         event.reply_token,
-        TextSendMessage(text=event.message.address))
+        TextSendMessage(text=event.message.address, quick_reply=quick_reply))
 
 
 @handler.add(MessageEvent, message=StickerMessage)
@@ -77,4 +86,5 @@ def handle_sticker_message(event):
     """ StickerMessage handler - スタンプのハンドラ"""
     line_bot_api.reply_message(
         event.reply_token,
-        StickerSendMessage(package_id=event.message.package_id, sticker_id=event.message.sticker_id))
+        StickerSendMessage(package_id=event.message.package_id, sticker_id=event.message.sticker_id,
+                           quick_reply=quick_reply))
