@@ -27,11 +27,15 @@ logger = logging.getLogger(__name__)
 
 
 # *SendMessage 利用時に共通して使うクリックリプライボタン (カメラで更新等のクイックボタンを毎度、つける)
-quick_reply = QuickReply(items=[
+DEFAULT_QUICK_REPLY = QuickReply(items=[
     QuickReplyButton(action=CameraAction(label="カメラで更新")),
     QuickReplyButton(action=CameraRollAction(label="写真で更新")),
     QuickReplyButton(action=LocationAction(label="場所を設定")),
 ])
+quick_reply_dict = {
+    None: DEFAULT_QUICK_REPLY,
+    "no_menu": None,
+}
 
 
 def callback(headers, body):
@@ -53,6 +57,7 @@ def handle_text_message(event):
     # セッション処理
     session_info = backend.get_session(event.source.user_id)
     response = control_session.do(session_info, vars(event.message))
+    quick_reply = quick_reply_dict.get(response.get("quick_reply"))
 
     line_bot_api.reply_message(
         event.reply_token,
@@ -75,6 +80,7 @@ def handle_image_message(event):
     # セッション処理
     session_info = backend.get_session(event.source.user_id)
     response = control_session.do(session_info, {"image": image_url})
+    quick_reply = quick_reply_dict.get(response.get("quick_reply"))
 
     # メッセージ送信
     line_bot_api.reply_message(
@@ -88,6 +94,7 @@ def handle_location_message(event):
     # セッション処理
     session_info = backend.get_session(event.source.user_id)
     response = control_session.do(session_info, vars(event.message))
+    quick_reply = quick_reply_dict.get(response.get("quick_reply"))
 
     # メッセージ送信
     # line_bot_api.reply_message(
@@ -105,4 +112,4 @@ def handle_sticker_message(event):
     line_bot_api.reply_message(
         event.reply_token,
         StickerSendMessage(package_id=event.message.package_id, sticker_id=event.message.sticker_id,
-                           quick_reply=quick_reply))
+                           quick_reply=DEFAULT_QUICK_REPLY))

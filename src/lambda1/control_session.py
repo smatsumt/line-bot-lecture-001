@@ -36,7 +36,7 @@ def do_register_store(session_info: dict, request: dict):
     if not store_info:
         # 最初の第一歩
         backend.create_store(user_id)
-        return {"text": "お店の名前を教えて下さい"}
+        return {"text": "お店の名前を教えて下さい", "quick_reply": "no_menu"}
 
     # store_id がある -> お店の名前の入力への応答、のはず
     store_name = request["text"]
