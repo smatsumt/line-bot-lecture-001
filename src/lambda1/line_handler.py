@@ -15,6 +15,7 @@ from linebot.models import (
 )
 
 import backend_aws
+import control_session
 
 backend = backend_aws  # ここを指定して、モジュールを差し替えることが可能
 
@@ -49,9 +50,13 @@ def callback(headers, body):
 @handler.add(MessageEvent, message=TextMessage)
 def handle_text_message(event):
     """ TextMessage handler """
+    # セッション処理
+    session_info = backend.get_session(event.source.user_id)
+    response = control_session.do(session_info, vars(MessageEvent))
+
     line_bot_api.reply_message(
         event.reply_token,
-        TextSendMessage(text=event.message.text, quick_reply=quick_reply))
+        TextSendMessage(text=response["text"], quick_reply=quick_reply))
 
 
 @handler.add(MessageEvent, message=ImageMessage)
@@ -65,20 +70,33 @@ def handle_image_message(event):
             fd.write(chunk)
 
     # バックエンド処理
-    backend.store_image_file(file_path)
+    image_url = backend.store_image_file(file_path)
+
+    # セッション処理
+    session_info = backend.get_session(event.source.user_id)
+    response = control_session.do(session_info, {"image": image_url})
 
     # メッセージ送信
     line_bot_api.reply_message(
         event.reply_token,
-        TextSendMessage(text=event.message.id, quick_reply=quick_reply))
+        TextSendMessage(text=response["text"], quick_reply=quick_reply))
 
 
 @handler.add(MessageEvent, message=LocationMessage)
 def handle_location_message(event):
     """ LocationMessage handler """
+    # セッション処理
+    session_info = backend.get_session(event.source.user_id)
+    response = control_session.do(session_info, vars(event.message))
+
+    # メッセージ送信
+    # line_bot_api.reply_message(
+    #     event.reply_token,
+    #     TextSendMessage(text=event.message.address, quick_reply=quick_reply))
+
     line_bot_api.reply_message(
         event.reply_token,
-        TextSendMessage(text=event.message.address, quick_reply=quick_reply))
+        TextSendMessage(text=response["text"], quick_reply=quick_reply))
 
 
 @handler.add(MessageEvent, message=StickerMessage)
