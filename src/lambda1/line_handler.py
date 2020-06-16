@@ -52,7 +52,7 @@ def handle_text_message(event):
     """ TextMessage handler """
     # セッション処理
     session_info = backend.get_session(event.source.user_id)
-    response = control_session.do(session_info, vars(MessageEvent))
+    response = control_session.do(session_info, vars(event.message))
 
     line_bot_api.reply_message(
         event.reply_token,

@@ -4,6 +4,7 @@
 import logging
 import os
 from pathlib import Path
+import uuid
 
 import boto3
 
@@ -26,7 +27,14 @@ def store_image_file(local_filepath: Path):
 
 
 # store info functions
-def insert_store(user_id: str, store_info: dict):
+def create_store(user_id: str):
+    store_id = str(uuid.uuid4())
+    store_info = {
+        "id": store_id,
+        "name": "",
+        "images": [],
+        "location": {},
+    }
     user_2_store_info[user_id] = store_info
 
 
