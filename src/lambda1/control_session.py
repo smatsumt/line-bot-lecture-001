@@ -78,7 +78,15 @@ def do_update_store(session_info: dict, request: dict):
         return [{"text": f"お店の場所を {request['address']} に設定しました。"}]
 
     else:
-        # デバッグ用 - お店情報の json を出す
+        # デバッグ用 - お店情報を出す
         store_info = backend.query_store(user_id)
-        message = json.dumps(store_info, ensure_ascii=False)
-        return [{"text": message}]
+        message_str = f"お店の名前: {store_info['name']}"
+        if store_info.get("location"):
+            message_str += f"\n住所: {store_info['location']['address']}"
+        response = [{"text": message_str}]
+        if len(store_info["images"]) > 0:
+            # とりあえず最新 2 件の画像をメッセージに出す
+            response.append({"text": "画像(最新2件)"})
+            for image in store_info["images"][:-3:-1]:
+                response.append({"image": image})
+        return response

@@ -138,10 +138,12 @@ def handle_sticker_message(event):
 
 def _response_to_message(response: dict):
     """ control_session が返す response から Line の Message オブジェクトを生成 """
+    quick_reply = quick_reply_dict.get(response.get("quick_reply"))
     if "text" in response:
-        quick_reply = quick_reply_dict.get(response.get("quick_reply"))
         return TextSendMessage(text=response["text"], quick_reply=quick_reply)
     elif "image" in response:
-        return ImageSendMessage(original_content_url=response["image"])
+        return ImageSendMessage(original_content_url=response["image"],
+                                preview_image_url=response["image"],
+                                quick_reply=quick_reply)
     else:
         raise ValueError("Invalid response.")
