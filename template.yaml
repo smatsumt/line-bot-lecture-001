@@ -45,7 +45,12 @@ Resources:
 
   ImageBucket:
     Type: AWS::S3::Bucket
-    Properties: {AccessControl: PublicRead}
+    Properties:
+      AccessControl: PublicRead
+      LifecycleConfiguration:
+        Rules:
+          - Status: Enabled
+            ExpirationInDays: 2
   ImageBucketPolicy:
     Type: AWS::S3::BucketPolicy
     Properties:
