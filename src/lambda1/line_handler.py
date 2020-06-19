@@ -38,18 +38,13 @@ quick_reply_dict = {
     "no_menu": None,
 }
 
-# WELLCOME_MESSAGE = """
-# {nickname_call}はじめまして！😃
-# 友だち追加ありがとうございます。firsttest001 です。
-#
-# このトークからの通知を受け取らない場合は、画面右上のメニューから通知をオフにしてください。
-# """.strip()
 WELLCOME_MESSAGE = """
 {nickname_call}はじめまして！😃
 友だち追加ありがとうございます。firsttest001 です。
 
 さっそくお店の登録から、始めていきましょう！
 """.strip()
+# このトークからの通知を受け取らない場合は、画面右上のメニューから通知をオフにしてください。
 
 
 def callback(headers, body):
@@ -126,11 +121,6 @@ def handle_location_message(event):
     # セッション処理
     session_info = backend.get_session(event.source.user_id)
     response = control_session.do(session_info, vars(event.message))
-
-    # メッセージ送信
-    # line_bot_api.reply_message(
-    #     event.reply_token,
-    #     TextSendMessage(text=event.message.address, quick_reply=quick_reply))
 
     line_bot_api.reply_message(
         event.reply_token,
