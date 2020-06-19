@@ -10,9 +10,9 @@ from linebot import (
 )
 from linebot.models import (
     MessageEvent, TextMessage, ImageMessage, LocationMessage, StickerMessage,
-    TextSendMessage, StickerSendMessage,
+    TextSendMessage, ImageSendMessage, StickerSendMessage,
     QuickReply, QuickReplyButton, CameraAction, CameraRollAction, LocationAction,
-    FollowEvent, SourceUser
+    FollowEvent, SourceUser,
 )
 
 import backend_aws
@@ -73,17 +73,15 @@ def handle_follow(event):
     if isinstance(event.source, SourceUser):
         profile = line_bot_api.get_profile(event.source.user_id)
         nickname_call = f"{profile.display_name}さん、"
+    welcome_messages = [TextSendMessage(text=WELLCOME_MESSAGE.format(nickname_call=nickname_call))]
 
     # セッション処理 - text_message のときと同じ
     session_info = backend.get_session(event.source.user_id)
     response = control_session.do(session_info, {})
-    quick_reply = quick_reply_dict.get(response.get("quick_reply"))
-
     # あいさつメッセージを添えて、初期メッセージを出す
     line_bot_api.reply_message(
         event.reply_token,
-        [TextSendMessage(text=WELLCOME_MESSAGE.format(nickname_call=nickname_call)),
-         TextSendMessage(text=response["text"], quick_reply=quick_reply)]
+        welcome_messages + list(map(_response_to_message, response))
     )
 
 
@@ -93,11 +91,10 @@ def handle_text_message(event):
     # セッション処理
     session_info = backend.get_session(event.source.user_id)
     response = control_session.do(session_info, vars(event.message))
-    quick_reply = quick_reply_dict.get(response.get("quick_reply"))
 
     line_bot_api.reply_message(
         event.reply_token,
-        TextSendMessage(text=response["text"], quick_reply=quick_reply))
+        list(map(_response_to_message, response)))
 
 
 @handler.add(MessageEvent, message=ImageMessage)
@@ -116,12 +113,11 @@ def handle_image_message(event):
     # セッション処理
     session_info = backend.get_session(event.source.user_id)
     response = control_session.do(session_info, {"image": image_url})
-    quick_reply = quick_reply_dict.get(response.get("quick_reply"))
 
     # メッセージ送信
     line_bot_api.reply_message(
         event.reply_token,
-        TextSendMessage(text=response["text"], quick_reply=quick_reply))
+        list(map(_response_to_message, response)))
 
 
 @handler.add(MessageEvent, message=LocationMessage)
@@ -130,7 +126,6 @@ def handle_location_message(event):
     # セッション処理
     session_info = backend.get_session(event.source.user_id)
     response = control_session.do(session_info, vars(event.message))
-    quick_reply = quick_reply_dict.get(response.get("quick_reply"))
 
     # メッセージ送信
     # line_bot_api.reply_message(
@@ -139,7 +134,7 @@ def handle_location_message(event):
 
     line_bot_api.reply_message(
         event.reply_token,
-        TextSendMessage(text=response["text"], quick_reply=quick_reply))
+        list(map(_response_to_message, response)))
 
 
 @handler.add(MessageEvent, message=StickerMessage)
@@ -149,3 +144,14 @@ def handle_sticker_message(event):
         event.reply_token,
         StickerSendMessage(package_id=event.message.package_id, sticker_id=event.message.sticker_id,
                            quick_reply=DEFAULT_QUICK_REPLY))
+
+
+def _response_to_message(response: dict):
+    """ control_session が返す response から Line の Message オブジェクトを生成 """
+    if "text" in response:
+        quick_reply = quick_reply_dict.get(response.get("quick_reply"))
+        return TextSendMessage(text=response["text"], quick_reply=quick_reply)
+    elif "image" in response:
+        return ImageSendMessage(original_content_url=response["image"])
+    else:
+        raise ValueError("Invalid response.")
