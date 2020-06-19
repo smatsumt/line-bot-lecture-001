@@ -36,7 +36,7 @@ def do_register_store(session_info: dict, request: dict):
     if not store_info:
         # 最初の第一歩
         backend.create_store(user_id)
-        return {"text": "お店の名前を教えて下さい", "quick_reply": "no_menu"}
+        return {"text": "お店の名前を教えて下さい。", "quick_reply": "no_menu"}
 
     # store_id がある -> お店の名前の入力への応答、のはず
     store_name = request["text"]
@@ -46,7 +46,7 @@ def do_register_store(session_info: dict, request: dict):
     # お店の登録完了!
     session_info["store_id"] = store_info["id"]
     backend.store_session(user_id, session_info)
-    return {"text": f"お店の名前は \"{store_name}\" ですね。お店を登録しました。写真や場所の登録は、下のボタンを押してください。"}
+    return {"text": f"お店の名前は \"{store_name}\" ですね。お店を登録しました！\n\n写真や場所の登録は、下のボタンを押してください。"}
 
 
 def do_update_store(session_info: dict, request: dict):
@@ -64,7 +64,7 @@ def do_update_store(session_info: dict, request: dict):
         images.append(request["image"])
         store_info["images"] = images
         backend.update_store(user_id, store_info)
-        return {"text": "お店の写真を更新しました"}
+        return {"text": "お店の写真を更新しました！"}
 
     elif "address" in request:
         # 場所情報がきたとき
@@ -75,7 +75,7 @@ def do_update_store(session_info: dict, request: dict):
             "longitude": request["longitude"],
         }
         backend.update_store(user_id, store_info)
-        return {"text": f"お店の場所を {request['address']} に設定しました"}
+        return {"text": f"お店の場所を {request['address']} に設定しました。"}
 
     else:
         # デバッグ用 - お店情報の json を出す
