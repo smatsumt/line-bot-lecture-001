@@ -40,9 +40,9 @@ quick_reply_dict = {
 
 WELLCOME_MESSAGE = """
 {nickname_call}はじめまして！😃
-友だち追加ありがとうございます。firsttest001 です。
+友だち追加ありがとうございます。Udemy EE LineBot001 です。
 
-さっそくお店の登録から、始めていきましょう！
+顔写真を投稿してね!
 """.strip()
 # このトークからの通知を受け取らない場合は、画面右上のメニューから通知をオフにしてください。
 
@@ -70,26 +70,19 @@ def handle_follow(event):
         nickname_call = f"{profile.display_name}さん、"
     welcome_messages = [TextSendMessage(text=WELLCOME_MESSAGE.format(nickname_call=nickname_call))]
 
-    # セッション処理 - text_message のときと同じ
-    session_info = backend.get_session(event.source.user_id)
-    response = control_session.do(session_info, {})
-    # あいさつメッセージを添えて、初期メッセージを出す
+    # あいさつメッセージを出す
     line_bot_api.reply_message(
         event.reply_token,
-        welcome_messages + list(map(_response_to_message, response))
+        welcome_messages
     )
 
 
 @handler.add(MessageEvent, message=TextMessage)
 def handle_text_message(event):
     """ TextMessage handler """
-    # セッション処理
-    session_info = backend.get_session(event.source.user_id)
-    response = control_session.do(session_info, vars(event.message))
-
     line_bot_api.reply_message(
         event.reply_token,
-        list(map(_response_to_message, response)))
+        TextSendMessage(text=event.message.text))
 
 
 @handler.add(MessageEvent, message=ImageMessage)
@@ -105,14 +98,10 @@ def handle_image_message(event):
     # バックエンド処理
     image_url = backend.store_image_file(file_path)
 
-    # セッション処理
-    session_info = backend.get_session(event.source.user_id)
-    response = control_session.do(session_info, {"image": image_url})
-
     # メッセージ送信
     line_bot_api.reply_message(
         event.reply_token,
-        list(map(_response_to_message, response)))
+        TextSendMessage(text="2 人とも 100% 笑顔です!"))
 
 
 @handler.add(MessageEvent, message=LocationMessage)
