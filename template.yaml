@@ -1,17 +1,8 @@
 AWSTemplateFormatVersion: "2010-09-09"
 Transform: AWS::Serverless-2016-10-31
 Description: CloufFormation Template for project_name
-#
-# グローバル設定
-#
-Globals:
-  Function:
-    Runtime: python3.7
-    Timeout: 30  # API Gateway が 30 秒でタイムアウトのため、デフォルト値はそこにしておく
-    Tracing: "Active"
 
 Parameters:
-  StageTag: {Type: "String", Description: "Lambda のエイリアス, API のステージに使用", Default: "Prod"}
   LineChannelAccessToken: {Type: "String", Description: "LINE のアクセストークン"}
   LineChannelSecret: {Type: "String", Description: "LINE のチャンネルシークレット"}
 
@@ -19,57 +10,21 @@ Resources:
   EndPointFunction:
     Type: AWS::Serverless::Function
     Properties:
+      Runtime: python3.8
       CodeUri: src/lambda1
       Handler: lambda_handler.lambda_handler
-      AutoPublishAlias: !Ref StageTag
-      ReservedConcurrentExecutions: 1
       Environment: {Variables: {
         LINE_CHANNEL_ACCESS_TOKEN: !Ref LineChannelAccessToken,
         LINE_CHANNEL_SECRET: !Ref LineChannelSecret,
-        IMAGE_S3_BUCKET: !Ref ImageBucket,
       }}
-      Policies:
-        - S3CrudPolicy:
-            BucketName: !Ref ImageBucket
       Events:
         API:
           Type: Api
           Properties:
             Path: /api_endpoint
             Method: post
-            RestApiId: !Ref EndpointAPI
-
-  EndpointAPI:
-    Type: AWS::Serverless::Api
-    Properties: {StageName: !Ref StageTag}
-
-  ImageBucket:
-    Type: AWS::S3::Bucket
-    Properties:
-      AccessControl: PublicRead
-      LifecycleConfiguration:
-        Rules:
-          - Status: Enabled
-            ExpirationInDays: 2
-  ImageBucketPolicy:
-    Type: AWS::S3::BucketPolicy
-    Properties:
-      PolicyDocument:
-        Id: MyPolicy
-        Version: 2012-10-17
-        Statement:
-          - Sid: PublicReadForGetBucketObjects
-            Effect: Allow
-            Principal: '*'
-            Action: 's3:GetObject'
-            Resource: !Join
-              - ''
-              - - 'arn:aws:s3:::'
-                - !Ref ImageBucket
-                - /*
-      Bucket: !Ref ImageBucket
 
 Outputs:
   ApiEndpointURL:
     Description: API Endpoint URL
-    Value: !Sub "https://${EndpointAPI}.execute-api.${AWS::Region}.amazonaws.com/${EndpointAPI.Stage}/api_endpoint"
+    Value: !Sub "https://${ServerlessRestApi}.execute-api.${AWS::Region}.amazonaws.com/${ServerlessRestApi.Stage}/api_endpoint"

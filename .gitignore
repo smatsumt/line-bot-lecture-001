@@ -1,8 +1,0 @@
-venv
-
-.aws-sam
-samconfig.toml
-
-tmp
-work
-.env
