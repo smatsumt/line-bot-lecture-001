@@ -11,7 +11,7 @@ Resources:
     Type: AWS::Serverless::Function
     Properties:
       Runtime: python3.8
-      CodeUri: src/lambda1
+      CodeUri: src
       Handler: lambda_handler.lambda_handler
       Environment: {Variables: {
         LINE_CHANNEL_ACCESS_TOKEN: !Ref LineChannelAccessToken,
