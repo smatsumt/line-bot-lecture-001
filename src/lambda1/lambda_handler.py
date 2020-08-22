@@ -31,9 +31,6 @@ def callback(headers, body):
     # get X-Line-Signature header value
     signature = headers['X-Line-Signature']
 
-    # get request body as text
-    print("Request body: " + body)
-
     # handle webhook body
     handler.handle(body, signature)
 
@@ -43,6 +40,8 @@ def callback(headers, body):
 @handler.add(MessageEvent, message=TextMessage)
 def handle_text_message(event):
     """ TextMessage handler """
+    input_text = event.message.text
+
     line_bot_api.reply_message(
         event.reply_token,
-        TextSendMessage(text=event.message.text))
+        TextSendMessage(text=input_text))
