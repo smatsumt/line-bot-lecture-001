@@ -11,8 +11,8 @@ from linebot.models import (
     MessageEvent, TextMessage, TextSendMessage,
 )
 
-line_bot_api = LineBotApi(os.getenv('LINE_CHANNEL_ACCESS_TOKEN'))
 handler = WebhookHandler(os.getenv('LINE_CHANNEL_SECRET'))
+line_bot_api = LineBotApi(os.getenv('LINE_CHANNEL_ACCESS_TOKEN'))
 
 
 def lambda_handler(event, context):
