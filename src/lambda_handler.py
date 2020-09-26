@@ -16,7 +16,7 @@ line_bot_api = LineBotApi(os.getenv('LINE_CHANNEL_ACCESS_TOKEN'))
 
 
 def lambda_handler(event, context):
-    headers = event["headers"]  # or event["multiValueHeaders"]
+    headers = event["headers"]
     body = event["body"]
 
     # get X-Line-Signature header value
@@ -36,3 +36,4 @@ def handle_text_message(event):
     line_bot_api.reply_message(
         event.reply_token,
         TextSendMessage(text=input_text))
+
