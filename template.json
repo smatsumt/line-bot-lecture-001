@@ -11,7 +11,7 @@
       "Properties": {
         "Runtime": "python3.8",
         "CodeUri": "src",
-        "Handler": "linebot.lambda_handler",
+        "Handler": "mylinebot.lambda_handler",
         "Environment": {"Variables": {
             "LINE_CHANNEL_ACCESS_TOKEN": {"Ref": "LineChannelAccessToken"},
             "LINE_CHANNEL_SECRET": {"Ref": "LineChannelSecret"}
