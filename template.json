@@ -12,6 +12,7 @@
         "Runtime": "python3.8",
         "CodeUri": "src",
         "Handler": "mylinebot.lambda_handler",
+        "Policies": [{"RekognitionDetectOnlyPolicy": {}}],
         "Environment": {"Variables": {
             "LINE_CHANNEL_ACCESS_TOKEN": {"Ref": "LineChannelAccessToken"},
             "LINE_CHANNEL_SECRET": {"Ref": "LineChannelSecret"}
