@@ -52,7 +52,65 @@ def handle_image_message(event):
     # Rekognition 呼び出し
     result = rekognition.detect_faces(Image={"Bytes": sent_image_bytes}, Attributes=["ALL"])
 
+    # メッセージを決める
+    if all_happy(result):
+        message = "みんな、いい笑顔ですね!!"
+    elif all_angry(result):
+        message = "みんな怒ってますねー"
+    elif no_face(result):
+        message = "そこに誰もいませんよ"
+    else:
+        message = "ぼちぼちですね"
+
     # 結果を出す
     line_bot_api.reply_message(
         event.reply_token,
-        TextSendMessage(text=str(result)))
+        TextSendMessage(text=message))
+
+
+def all_happy(result):
+    """
+    全員が happy なら True を返す
+    :param result:
+    :return:
+    """
+    for detail in result["FaceDetails"]:
+        if most_emotion(detail["Emotions"]) != "HAPPY":
+            return False
+    return True
+
+
+def all_angry(result):
+    """
+    全員が怒っていたら True を返す
+    :param result:
+    :return:
+    """
+    for detail in result["FaceDetails"]:
+        if most_emotion(detail["Emotions"]) != "ANGRY":
+            return False
+    return True
+
+
+def no_face(result):
+    """
+    顔がなければ True
+    :param result:
+    :return:
+    """
+    return len(result["FaceDetails"]) < 1
+
+
+def most_emotion(emotions):
+    """
+    もっとも確信度が高い感情を返す
+    :param emotions:
+    :return:
+    """
+    max_conf = 0
+    result = ""
+    for e in emotions:
+        if max_conf < e["Confidence"]:
+            max_conf = e["Confidence"]
+            result = e["Type"]
+    return result
