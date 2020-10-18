@@ -57,10 +57,20 @@ def handle_image_message(event):
         sent_image_binary = fd.read()
         response = rekognition.detect_faces(Image={"Bytes": sent_image_binary}, Attributes=["ALL"])
 
+    # メッセージを決める
+    if all_happy(response):
+        message = "みんな、いい笑顔ですね!!"
+    elif all_angry(response):
+        message = "みんな怒ってますねー"
+    elif no_face(response):
+        message = "そこに誰もいませんよ"
+    else:
+        message = "ぼちぼちですね"
+
     # 返答を送信する
     line_bot_api.reply_message(
         event.reply_token,
-        TextSendMessage(text=str(response)[:1000]))
+        TextSendMessage(text=message))
 
     # file_path の画像を削除
     os.remove(file_path)
