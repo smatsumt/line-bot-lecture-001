@@ -45,60 +45,58 @@ def handle_text_message(event):
 @handler.add(MessageEvent, message=ImageMessage)
 def handle_image_message(event):
     """ TextMessage handler """
-    # 画像を取得
+    # ユーザから送られてきた画像を一時ファイルとして保存
     message_content = line_bot_api.get_message_content(event.message.id)
-    sent_image_bytes = message_content.content
+    file_path = "/tmp/sent_image.jpg"
+    with open(file_path, 'wb') as fd:
+        for chunk in message_content.iter_content():
+            fd.write(chunk)
 
-    # Rekognition 呼び出し
-    result = rekognition.detect_faces(Image={"Bytes": sent_image_bytes}, Attributes=["ALL"])
+    # Rekognition で感情分析する
+    with open(file_path, 'rb') as fd:
+        sent_image_binary = fd.read()
+        response = rekognition.detect_faces(Image={"Bytes": sent_image_binary}, Attributes=["ALL"])
 
-    # メッセージを決める
-    if all_happy(result):
-        message = "みんな、いい笑顔ですね!!"
-    elif all_angry(result):
-        message = "みんな怒ってますねー"
-    elif no_face(result):
-        message = "そこに誰もいませんよ"
-    else:
-        message = "ぼちぼちですね"
-
-    # 結果を出す
+    # 返答を送信する
     line_bot_api.reply_message(
         event.reply_token,
-        TextSendMessage(text=message))
+        TextSendMessage(text=str(response)[:1000]))
+
+    # file_path の画像を削除
+    os.remove(file_path)
 
 
-def all_happy(result):
+def all_happy(response):
     """
     全員が happy なら True を返す
-    :param result:
+    :param response:
     :return:
     """
-    for detail in result["FaceDetails"]:
+    for detail in response["FaceDetails"]:
         if most_emotion(detail["Emotions"]) != "HAPPY":
             return False
     return True
 
 
-def all_angry(result):
+def all_angry(response):
     """
     全員が怒っていたら True を返す
-    :param result:
+    :param response:
     :return:
     """
-    for detail in result["FaceDetails"]:
+    for detail in response["FaceDetails"]:
         if most_emotion(detail["Emotions"]) != "ANGRY":
             return False
     return True
 
 
-def no_face(result):
+def no_face(response):
     """
     顔がなければ True
-    :param result:
+    :param response:
     :return:
     """
-    return len(result["FaceDetails"]) < 1
+    return len(response["FaceDetails"]) < 1
 
 
 def most_emotion(emotions):
