@@ -83,7 +83,7 @@ def all_happy(response):
     :return:
     """
     for detail in response["FaceDetails"]:
-        if most_emotion(detail["Emotions"]) != "HAPPY":
+        if most_confident_emotion(detail["Emotions"]) != "HAPPY":
             return False
     return True
 
@@ -95,7 +95,7 @@ def all_angry(response):
     :return:
     """
     for detail in response["FaceDetails"]:
-        if most_emotion(detail["Emotions"]) != "ANGRY":
+        if most_confident_emotion(detail["Emotions"]) != "ANGRY":
             return False
     return True
 
@@ -109,7 +109,7 @@ def no_face(response):
     return len(response["FaceDetails"]) < 1
 
 
-def most_emotion(emotions):
+def most_confident_emotion(emotions):
     """
     もっとも確信度が高い感情を返す
     :param emotions:
